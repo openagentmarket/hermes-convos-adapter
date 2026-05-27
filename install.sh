@@ -25,9 +25,54 @@ mkdir -p "$(dirname "$PLUGIN_DIR")"
 rm -rf "$PLUGIN_DIR"
 mkdir -p "$PLUGIN_DIR"
 
-for item in plugin.yaml __init__.py adapter.py sidecar README.md; do
+for item in plugin.yaml __init__.py adapter.py README.md; do
   cp -R "$ROOT_DIR/$item" "$PLUGIN_DIR/"
 done
+
+mkdir -p "$PLUGIN_DIR/sidecar"
+for item in package.json package-lock.json tsconfig.json src dist; do
+  cp -R "$ROOT_DIR/sidecar/$item" "$PLUGIN_DIR/sidecar/"
+done
+
+patch_macos_xmtp_bindings() {
+  if [ "$(uname -s)" != "Darwin" ]; then
+    return
+  fi
+  if ! command -v otool >/dev/null 2>&1 || ! command -v install_name_tool >/dev/null 2>&1; then
+    return
+  fi
+
+  local libiconv=""
+  for candidate in \
+    "/opt/homebrew/opt/libiconv/lib/libiconv.2.dylib" \
+    "/usr/local/opt/libiconv/lib/libiconv.2.dylib" \
+    "/usr/lib/libiconv.2.dylib"; do
+    if [ -f "$candidate" ]; then
+      libiconv="$candidate"
+      break
+    fi
+  done
+  if [ -z "$libiconv" ]; then
+    return
+  fi
+
+  while IFS= read -r -d '' binding; do
+    local linked_iconv=""
+    linked_iconv="$(otool -L "$binding" 2>/dev/null | awk '/\\/nix\\/store\\/.*libiconv\\.2\\.dylib/ {print $1; exit}')"
+    if [ -z "$linked_iconv" ]; then
+      continue
+    fi
+    echo "Patching XMTP macOS native binding: $binding"
+    install_name_tool -change "$linked_iconv" "$libiconv" "$binding" || true
+    if command -v codesign >/dev/null 2>&1; then
+      codesign --force --sign - "$binding" >/dev/null 2>&1 || true
+    fi
+  done < <(find "$PLUGIN_DIR/sidecar/node_modules" -path '*@xmtp/node-bindings/dist/bindings_node.darwin-arm64.node' -print0 2>/dev/null)
+}
+
+echo "Installing sidecar runtime dependencies in $PLUGIN_DIR/sidecar..."
+npm --prefix "$PLUGIN_DIR/sidecar" install --omit=dev
+patch_macos_xmtp_bindings
 
 echo "Enabling Hermes plugin platforms/convos..."
 hermes plugins enable platforms/convos
