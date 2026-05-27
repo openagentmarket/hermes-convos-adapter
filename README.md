@@ -80,6 +80,31 @@ CONVOS_ALLOW_ALL_USERS=true
 Do not use `CONVOS_ALLOW_ALL_USERS=true` for a private agent with access to
 files, shell commands, secrets, or paid APIs.
 
+## Copy-Paste Prompt for Hermes
+
+If you already chat with Hermes through Telegram, Discord, Slack, or another
+gateway, you can ask Hermes to install this adapter for itself:
+
+```text
+Install the OpenAgent Hermes Convos adapter so I can chat with this same Hermes
+runtime from the Convos mobile app:
+
+https://github.com/openagentmarket/hermes-convos-adapter.git
+
+Clone the repo, run ./install.sh, enable the plugin, restart the Hermes gateway
+if needed, then show me the Convos invite URL from ~/.hermes/convos/info.json.
+
+The installer may temporarily set CONVOS_ALLOW_ALL_USERS=true so I can join the
+first Convos group. After I join and send the first message in Convos, lock the
+adapter to my XMTP inbox ID: find the recent Convos inbound user/inbox ID in
+~/.hermes/logs/gateway.log, set CONVOS_ALLOWED_USERS to that inbox ID in
+~/.hermes/.env, set CONVOS_ALLOW_ALL_USERS=false or remove it, and restart the
+gateway again.
+```
+
+`CONVOS_ALLOWED_USERS` uses XMTP inbox IDs, not wallet addresses. In gateway
+logs it appears as the Convos inbound `user=...` value.
+
 ## Manual Install
 
 If you do not want to run the installer:
