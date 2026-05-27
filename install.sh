@@ -4,6 +4,7 @@ set -euo pipefail
 ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 HERMES_HOME="${HERMES_HOME:-$HOME/.hermes}"
 PLUGIN_DIR="$HERMES_HOME/plugins/platforms/convos"
+ENV_FILE="$HERMES_HOME/.env"
 
 if ! command -v hermes >/dev/null 2>&1; then
   echo "hermes command not found. Install Hermes Agent first." >&2
@@ -31,18 +32,53 @@ done
 echo "Enabling Hermes plugin platforms/convos..."
 hermes plugins enable platforms/convos
 
+random_hex() {
+  local bytes="$1"
+  if command -v openssl >/dev/null 2>&1; then
+    openssl rand -hex "$bytes"
+    return
+  fi
+  node -e "console.log(require('crypto').randomBytes($bytes).toString('hex'))"
+}
+
+append_env_if_missing() {
+  local key="$1"
+  local value="$2"
+  if [ -f "$ENV_FILE" ] && grep -q "^${key}=" "$ENV_FILE"; then
+    echo "Keeping existing $key in $ENV_FILE"
+    return
+  fi
+  printf '%s=%s\n' "$key" "$value" >> "$ENV_FILE"
+  echo "Added $key to $ENV_FILE"
+}
+
+echo "Bootstrapping Convos environment in $ENV_FILE..."
+mkdir -p "$HERMES_HOME"
+touch "$ENV_FILE"
+chmod 600 "$ENV_FILE" 2>/dev/null || true
+
+append_env_if_missing "CONVOS_XMTP_WALLET_KEY" "0x$(random_hex 32)"
+append_env_if_missing "CONVOS_XMTP_DB_ENCRYPTION_KEY" "$(random_hex 32)"
+append_env_if_missing "CONVOS_XMTP_ENV" "production"
+append_env_if_missing "CONVOS_AGENT_NAME" "Hermes Agent"
+append_env_if_missing "CONVOS_GROUP_NAME" "Hermes Agent"
+
+if ! grep -q '^CONVOS_ALLOWED_USERS=' "$ENV_FILE" && ! grep -q '^CONVOS_ALLOW_ALL_USERS=' "$ENV_FILE"; then
+  append_env_if_missing "CONVOS_ALLOW_ALL_USERS" "true"
+fi
+
 cat <<EOF
 
 Hermes Convos adapter installed.
 
 Next:
-1. Add CONVOS_XMTP_WALLET_KEY and related settings to:
-   $HERMES_HOME/.env
-
-2. Start Hermes:
+1. Restart Hermes so it loads the Convos platform:
    hermes gateway
 
-3. Open the invite URL from the gateway logs, or read:
+2. Open the invite URL from the gateway logs, or read:
    $HERMES_HOME/convos/info.json
+
+For quick local testing, this installer sets CONVOS_ALLOW_ALL_USERS=true when
+no allowlist exists. For a private agent, replace it with CONVOS_ALLOWED_USERS.
 
 EOF

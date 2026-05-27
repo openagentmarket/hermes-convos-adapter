@@ -31,10 +31,10 @@ Convos/XMTP group
 
 - Hermes Agent installed and configured
 - Node.js 20+ and npm
-- An XMTP wallet private key for the agent identity
 - A Convos app/client that can open XMTP group invite links
 
-The XMTP wallet belongs to the Hermes agent, not to the human user. Keep that
+The installer can generate an XMTP wallet for the Hermes agent. This wallet
+belongs to the agent identity on XMTP/Convos, not to the human user. Keep that
 private key secret.
 
 ## Quick Install
@@ -52,22 +52,28 @@ The installer:
 1. Installs and builds the Node sidecar.
 2. Copies the plugin into `~/.hermes/plugins/platforms/convos`.
 3. Enables the plugin with `hermes plugins enable platforms/convos`.
+4. Creates missing Convos env settings in `~/.hermes/.env`, including an
+   agent XMTP wallet and local DB encryption key.
 
-Then add your environment variables to `~/.hermes/.env`:
+For quick local testing, the installer also writes `CONVOS_ALLOW_ALL_USERS=true`
+when neither `CONVOS_ALLOWED_USERS` nor `CONVOS_ALLOW_ALL_USERS` already exists.
+This makes the first Convos group work immediately.
+
+For a private agent, replace that line with an owner allowlist:
+
+```bash
+CONVOS_ALLOWED_USERS=<your-xmtp-inbox-id>
+```
+
+You can also set the values yourself before running the installer. Existing
+settings are preserved:
 
 ```bash
 CONVOS_XMTP_WALLET_KEY=0x...
 CONVOS_XMTP_DB_ENCRYPTION_KEY=...
 CONVOS_XMTP_ENV=production
-CONVOS_AGENT_NAME=Hermes
+CONVOS_AGENT_NAME=Hermes Agent
 CONVOS_GROUP_NAME=Hermes Agent
-CONVOS_ALLOWED_USERS=<your-xmtp-inbox-id>
-```
-
-For local development or a public demo bot, you can explicitly allow every
-sender in the group:
-
-```bash
 CONVOS_ALLOW_ALL_USERS=true
 ```
 

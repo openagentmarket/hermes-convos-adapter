@@ -393,8 +393,9 @@ class ConvosAdapter(BasePlatformAdapter):
 
 
 def interactive_setup() -> None:
-    print("Configure Convos by setting CONVOS_XMTP_WALLET_KEY in ~/.hermes/.env.")
-    print("Optional: set CONVOS_ALLOWED_USERS to owner XMTP inbox IDs.")
+    print("Run ./install.sh from the hermes-convos-adapter repo to install and bootstrap Convos.")
+    print("The installer generates CONVOS_XMTP_WALLET_KEY if it is missing.")
+    print("For private agents, set CONVOS_ALLOWED_USERS to owner XMTP inbox IDs.")
 
 
 def register(ctx) -> None:
