@@ -1,0 +1,21 @@
+{
+  "name": "hermes-convos-sidecar",
+  "version": "0.1.0",
+  "type": "module",
+  "private": true,
+  "description": "Convos/XMTP transport sidecar for the Hermes Convos platform adapter",
+  "main": "dist/index.js",
+  "scripts": {
+    "start": "tsx src/index.ts",
+    "build": "tsc -p tsconfig.json",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "convos-node-sdk": "https://github.com/xmtplabs/convos-node-sdk/archive/32d061f14cd51725b7a8a47b9c928839e9527e9f.tar.gz"
+  },
+  "devDependencies": {
+    "@types/node": "^22.10.5",
+    "tsx": "^4.19.2",
+    "typescript": "^5.7.2"
+  }
+}

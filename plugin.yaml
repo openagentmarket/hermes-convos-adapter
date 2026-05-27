@@ -1,0 +1,50 @@
+name: convos-platform
+label: Convos
+kind: platform
+version: 0.1.0
+description: >
+  Convos/XMTP gateway adapter for Hermes Agent. Connects a Convos group to the
+  Hermes gateway through a small Node transport sidecar.
+author: OpenAgent
+requires_env:
+  - name: CONVOS_XMTP_WALLET_KEY
+    description: "XMTP wallet private key for the Hermes Convos identity"
+    prompt: "XMTP wallet private key"
+    password: true
+optional_env:
+  - name: CONVOS_XMTP_DB_ENCRYPTION_KEY
+    description: "XMTP local database encryption key"
+    prompt: "XMTP DB encryption key"
+    password: true
+  - name: CONVOS_XMTP_ENV
+    description: "XMTP environment: production, dev, or local"
+    prompt: "XMTP environment"
+    password: false
+  - name: CONVOS_ALLOWED_USERS
+    description: "Comma-separated XMTP inbox IDs allowed to talk to this bot"
+    prompt: "Allowed XMTP inbox IDs"
+    password: false
+  - name: CONVOS_ALLOW_ALL_USERS
+    description: "Allow any Convos/XMTP sender to talk to this bot (dev/public mode)"
+    prompt: "Allow all users? (true/false)"
+    password: false
+  - name: CONVOS_HOME_CHANNEL
+    description: "Convos conversation ID for cron/background delivery"
+    prompt: "Home conversation ID"
+    password: false
+  - name: CONVOS_AGENT_NAME
+    description: "Bot display name"
+    prompt: "Agent name"
+    password: false
+  - name: CONVOS_GROUP_NAME
+    description: "Default Convos group name"
+    prompt: "Group name"
+    password: false
+  - name: CONVOS_CONVERSATION_POOL_SIZE
+    description: "Number of pre-created Convos groups"
+    prompt: "Conversation pool size"
+    password: false
+  - name: CONVOS_CONTROL_PORT
+    description: "Local control server port"
+    prompt: "Control port"
+    password: false
